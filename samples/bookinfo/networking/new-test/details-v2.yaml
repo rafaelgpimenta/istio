@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: details-v2
+  labels:
+    app: details
+    version: v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: details
+        version: v2
+    spec:
+      containers:
+      - name: details
+        image: rafaelgpimenta/examples-bookinfo-details-v2:1.13.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: details
+spec:
+  host: details
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: details
+spec:
+  hosts:
+  - details
+  http:
+  - route:
+    - destination:
+        host: details
+        subset: v1
+      weight: 80
+    - destination:
+        host: details
+        subset: v2
+      weight: 20
+

@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: details
-        image: istio/examples-bookinfo-details-v1:1.13.0
+        image: rafaelgpimenta/examples-bookinfo-details-v1:1.13.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
@@ -207,7 +207,7 @@ spec:
     spec:
       containers:
       - name: productpage
-        image: istio/examples-bookinfo-productpage-v1:1.13.0
+        image: rafaelgpimenta/examples-bookinfo-productpage-v1:1.13.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
