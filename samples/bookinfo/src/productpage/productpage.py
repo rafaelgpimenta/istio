@@ -17,6 +17,7 @@
 
 from flask import Flask, request, session, render_template, redirect, url_for
 from flask import _request_ctx_stack as stack
+from flask import Markup
 from jaeger_client import Tracer, ConstSampler
 from jaeger_client.reporter import NullReporter
 from jaeger_client.codecs import B3Codec
@@ -230,7 +231,7 @@ def front():
     headers = getForwardHeaders(request)
     user = session.get('user', '')
     product = getProduct(product_id)
-    detailsStatus, details = getProductDetails(product_id, headers)
+    detailsStatus, details, _content_type = getProductDetails(product_id, headers)
     reviewsStatus, reviews = getProductReviews(product_id, headers)
     return render_template(
         'productpage.html',
@@ -252,8 +253,8 @@ def productsRoute():
 @trace()
 def productRoute(product_id):
     headers = getForwardHeaders(request)
-    status, details = getProductDetails(product_id, headers)
-    return json.dumps(details), status, {'Content-Type': 'application/json'}
+    status, details, content_type = getProductDetails(product_id, headers)
+    return details, status, {'Content-Type': content_type}
 
 
 @app.route('/api/v1/products/<product_id>/reviews')
@@ -299,10 +300,10 @@ def getProductDetails(product_id, headers):
     except:
         res = None
     if res and res.status_code == 200:
-        return 200, res.json()
+        return 200, Markup(res.content), 'text/plain'
     else:
         status = res.status_code if res is not None and res.status_code else 500
-        return status, {'error': 'Sorry, product details are currently unavailable for this book.'}
+        return status, {'error': 'Sorry, product details are currently unavailable for this book.'}, 'application/json'
 
 
 def getProductReviews(product_id, headers):
